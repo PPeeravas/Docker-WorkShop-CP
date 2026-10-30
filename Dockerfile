@@ -5,7 +5,7 @@
 # =============================================================================
 
 # TODO(step-4a): set the builder base image as node:20.11-slim and name the stage "builder".
-FROM node:20.11-slim AS builder
+FROM node:24-slim AS builder
 #   Do NOT use `node:latest` — we want reproducible builds across the cohort.
 
 WORKDIR /app
@@ -22,12 +22,18 @@ COPY ./app ./
 # =============================================================================
 
 # TODO(step-4d): set the runtime base image (same tag as step-4a for consistency).
-FROM node:20.11-slim
+FROM node:24-slim
 
 WORKDIR /app
 
+# Install current Debian security fixes and omit npm from the runtime image.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # TODO(step-4e): copy the fully-installed app from the builder stage.
-COPY --from=builder ./ ./
+COPY --from=builder /app/ ./
 
 ENV NODE_ENV=production
 EXPOSE 3000
