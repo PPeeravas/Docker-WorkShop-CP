@@ -15,12 +15,12 @@ checklist item in the Self-Verification section below — tick them off as you g
 
 Tick each box as you complete it. The workshop is **done** when all 10 are ticked.
 
-- [ ] **AC-01:** `docker build -t workshop-app .` exits with status 0 locally.
-- [ ] **AC-02:** Dockerfile uses a multi-stage build (`grep -c '^FROM' Dockerfile` = 2).
-- [ ] **AC-03:** `.dockerignore` excludes at least `node_modules`, `.git`, and `.env`.
-- [ ] **AC-04:** Dockerfile contains a `HEALTHCHECK` instruction.
-- [ ] **AC-05:** `docker compose up -d` brings up two healthy containers within 60 seconds.
-- [ ] **AC-06:** `web` waits for `db` health (`docker compose config` shows `condition: service_healthy`).
+- [x] **AC-01:** `docker build -t workshop-app .` exits with status 0 locally.
+- [x] **AC-02:** Dockerfile uses a multi-stage build (`grep -c '^FROM' Dockerfile` = 2).
+- [x] **AC-03:** `.dockerignore` excludes at least `node_modules`, `.git`, and `.env`.
+- [x] **AC-04:** Dockerfile contains a `HEALTHCHECK` instruction.
+- [x] **AC-05:** `docker compose up -d` brings up two healthy containers within 60 seconds.
+- [x] **AC-06:** `web` waits for `db` health (`docker compose config` shows `condition: service_healthy`).
 - [ ] **AC-07:** `.github/workflows/ci.yml` triggers on`push` to `main`.
 - [ ] **AC-08:** The CI step `scan` uses `aquasecurity/trivy-action` with `severity: CRITICAL` and `exit-code: '1'`, and reports **0 CRITICAL** findings.
 - [ ] **AC-09:** The CI step `push` pushes two tags: `:latest` and `:${{ github.sha }}`.
@@ -43,6 +43,7 @@ Tick each box as you complete it. The workshop is **done** when all 10 are ticke
 ### Step 2 — Look at the app (no changes)
 
 Open `app/src/index.js`. Notice the three routes:
+
 - `GET /` → `{ ok: true }`
 - `GET /health` → 200 if it can reach Postgres, 503 otherwise (the Dockerfile HEALTHCHECK hits this)
 - `GET /tasks` → list from the `tasks` table, seeded by `app/db/init.sql`
@@ -54,9 +55,11 @@ You will **not** modify any file under `app/`.
 Open `.dockerignore` and complete `TODO(step-3)`. Required entries:
 
 **Verify (AC-03):**
+
 ```bash
 grep -E '^(node_modules|\.git|\.env)$' .dockerignore
 ```
+
 Should print three matching lines.
 
 ### Step 4 — Multi-stage Dockerfile
@@ -72,13 +75,15 @@ The key wiring: `web` `depends_on` `db` with `condition: service_healthy`, so th
 app doesn't try to connect before Postgres is ready.
 
 **Verify (AC-05, AC-06):**
+
 ```bash
 docker compose up -d
-docker compose ps                 
+docker compose ps
 docker compose config | grep -A1 depends_on
 ```
 
 Smoke test (also confirms AC-04 at runtime):
+
 ```bash
 docker inspect --format='{{.State.Health.Status}}' \
   $(docker compose ps -q web)            # should print: healthy
@@ -91,12 +96,14 @@ curl -fsS http://localhost:3000/tasks    # should list the seed task
 Open `.github/workflows/ci.yml` and complete `TODO(step-6a)` through `TODO(step-6e)` (5 markers).
 Delete the `workflow_dispatch:` placeholder trigger after you add the real ones in step-6a.
 
-**Add secrets to your fork** *before* pushing:
+**Add secrets to your fork** _before_ pushing:
+
 - GitHub → your fork → **Settings → Secrets and variables → Actions → New repository secret**
 - Add `DOCKERHUB_USERNAME` (your Docker Hub username)
 - Add `DOCKERHUB_TOKEN` (the Personal Access Token from Prerequisites)
 
 **Verify (AC-07..AC-10):**
+
 ```bash
 git add .
 git commit -m "complete docker workshop"
@@ -164,5 +171,4 @@ docker rm -f peer-app peer-db
 docker network rm peer-test
 ```
 
-
-Good luck! 
+Good luck!
